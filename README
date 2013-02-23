@@ -24,4 +24,4 @@ If you want to use other version of Hadoop MapReduce Next Generation, please dow
 
 Also remember to generate your ssh keys and put the keys in files/.
 
-Since master deployment will run hadoop scripts to launch hadoop services on slaves nodes, please deploy hadoop slaves first. When all slaves are deployed, then deply master node.
+Since master deployment will run hadoop scripts to launch hadoop services on slaves nodes, please deploy hadoop slaves first. When all slaves are deployed, then deploy master node.
