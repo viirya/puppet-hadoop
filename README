@@ -1,4 +1,3 @@
-
 Puppet module for deploying Hadoop MapReduce Next Generation on cluster
 
 This module deploys Hadoop MapReduce Next Generation on a cluster of machines. It is tested with Apache Hadoop 2.0.3-alpha under puppet agent/master environment. It is based on bcarpio/hadoop 0.0.3.
@@ -23,4 +22,6 @@ Please also modify parameters 'master', 'resourcemanager' and 'slaves' in manife
 
 If you want to use other version of Hadoop MapReduce Next Generation, please download the tar file and put in files/. Then modify parameter 'version' in manifests/params.pp.
 
+Also remember to generate your ssh keys and put the keys in files/.
 
+Since master deployment will run hadoop scripts to launch hadoop services on slaves nodes, please deploy hadoop slaves first. When all slaves are deployed, then deply master node.
