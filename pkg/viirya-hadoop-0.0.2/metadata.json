@@ -1,0 +1,43 @@
+{
+  "description": "This module deploys Hadoop MapReduce Next Generation on a cluster.",
+  "summary": "Install Hadoop MapReduce Next Generation.",
+  "source": "UNKNOWN",
+  "version": "0.0.2",
+  "license": "MIT License",
+  "types": [
+
+  ],
+  "dependencies": [
+    {
+      "version_requirement": "0.0.1",
+      "name": "viirya/java"
+    }
+  ],
+  "checksums": {
+    "Modulefile": "51cb128c58cc2ad57aedc64f227de096",
+    "README": "074fd8fa9e1a44d11d67688d61dc0ce1",
+    "templates/conf/yarn-site.xml.erb": "dbe846e55c8bee411b0cce9fc6880160",
+    "templates/conf/slaves.erb": "1ddd794f5a27743beac6997c361cf3bb",
+    "tests/init.pp": "f8f7d7631f8c82d2f068acdb95bf5011",
+    "templates/conf/hadoop-env.sh.erb": "e5d12dd967441a106562ae724c168388",
+    "templates/conf/masters.erb": "bb76fc696e44514751958b4396358a23",
+    "files/ssh/id_rsa": "ed2859664b4ec2f77a4648b5783bd00b",
+    "templates/conf/yarn-env.sh.erb": "71de19d5803265d0953e0022f5fd395f",
+    "spec/spec_helper.rb": "ca19ec4f451ebc7fdb035b52eae6e909",
+    "manifests/cluster.pp": "a1f3cf4181dab8c98bdb2a413365eb82",
+    "LICENSE": "e37441572d2f74ca884c994b6a9c8834",
+    "templates/conf/mapred-site.xml.erb": "e4e68aafbc5b7e3ff54d5b3ecff7efda",
+    "files/ssh/id_rsa.pub": "ac2ce76971fa94841a450d852545a849",
+    "files/ssh/config": "320761042c1db5b3a00c9ddc77c2b0c6",
+    "templates/conf/core-site.xml.erb": "cfd456c867e50c72b97d1461497e46f5",
+    "spec/spec.opts": "a600ded995d948e393fbe2320ba8e51c",
+    "manifests/params.pp": "8caba371b6e656a1db417c25b4f3fbfe",
+    "manifests/init.pp": "e97a1f0555d0e0f0919e875f773d88e8",
+    "templates/home/bash_profile.erb": "4229402f48180a3c7a7868c996b24e04",
+    "templates/conf/hdfs-site.xml.erb": "89272c0bf4745583c3633859ae4fd393",
+    "templates/conf/capacity-scheduler.xml.erb": "e41e258d828eaa79b911ad3a9ba6116b"
+  },
+  "name": "viirya-hadoop",
+  "project_page": "https://github.com/viirya/puppet-hadoop",
+  "author": "Liang-Chi Hsieh"
+}
