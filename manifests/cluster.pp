@@ -13,6 +13,7 @@ class hadoop::cluster::master {
         command => "./hadoop namenode -format",
         user => "${hadoop::params::hadoop_user}",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/bin",
+        creates => "${hadoop::params::hadoop_tmp_path}/dfs/name/current/VERSION",
         alias => "format-hdfs",
         path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/bin"],
         before => [Exec["start-namenode"], Exec["start-datanodes"], Exec["start-resourcemanager"], Exec["start-nodemanager"], Exec["start-historyserver"]],
@@ -54,7 +55,7 @@ class hadoop::cluster::master {
     }
 
     exec { "Start historyserver":
-        command => "./yarn-daemon.sh start historyserver",
+        command => "./mr-jobhistory-daemon.sh start historyserver",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin",
         user => "${hadoop::params::hadoop_user}",
         alias => "start-historyserver",
