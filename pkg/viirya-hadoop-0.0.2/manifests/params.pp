@@ -17,15 +17,15 @@ class hadoop::params {
 	}
         
 	$master = $::hostname ? {
-		default			=> "node2.novalocal",
+		default			=> "master.hadoop",
 	}
  
 	$resourcemanager = $::hostname ? {
-		default			=> "node2.novalocal",
+		default			=> "master.hadoop",
 	}
         
 	$slaves = $::hostname ? {
-		default			=> ["node3.novalocal"] 
+		default			=> ["slave01.hadoop", "slave02.hadoop"] 
 	}
  
 	$resource_tracker_port = $::hostname ? {

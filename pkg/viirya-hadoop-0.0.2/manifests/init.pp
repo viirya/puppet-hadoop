@@ -20,15 +20,24 @@ class hadoop {
 		require => Group["hadoop"],
 	}
 	
-	file { "${hadoop::params::hadoop_user_path}/.bash_profile":
+#   file { "${hadoop::params::hadoop_user_path}/.bash_profile":
+#   	ensure => present,
+#   	owner => "${hadoop::params::hadoop_user}",
+#   	group => "${hadoop::params::hadoop_group}",
+#   	alias => "${hadoop::params::hadoop_user}-bash_profile",
+#   	content => template("hadoop/home/bash_profile.erb"),
+#   	require => User["${hadoop::params::hadoop_user}"]
+#   }
+ 
+	file { "${hadoop::params::hadoop_user_path}/.bashrc":
 		ensure => present,
 		owner => "${hadoop::params::hadoop_user}",
 		group => "${hadoop::params::hadoop_group}",
-		alias => "${hadoop::params::hadoop_user}-bash_profile",
-		content => template("hadoop/home/bash_profile.erb"),
+		alias => "${hadoop::params::hadoop_user}-bashrc",
+		content => template("hadoop/home/bashrc.erb"),
 		require => User["${hadoop::params::hadoop_user}"]
 	}
-		
+    	
 	file { "${hadoop::params::hadoop_user_path}":
 		ensure => "directory",
 		owner => "${hadoop::params::hadoop_user}",
