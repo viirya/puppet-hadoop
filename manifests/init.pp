@@ -54,14 +54,6 @@ class hadoop {
 		require => File["${hadoop::params::hadoop_user}-home"]
 	}
  
-	file {"${hadoop::params::hdfs_path}":
-		ensure => "directory",
-		owner => "${hadoop::params::hadoop_user}",
-		group => "${hadoop::params::hadoop_group}",
-		alias => "hdfs-dir",
-		require => File["${hadoop::params::hadoop_user}-home"]
-	}
-	
 	file {"${hadoop::params::hadoop_base}":
 		ensure => "directory",
 		owner => "${hadoop::params::hadoop_user}",

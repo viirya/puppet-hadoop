@@ -76,10 +76,6 @@ class hadoop::params {
 		default			=> "/home/${hadoop_user}",
 	}             
 
-	$hdfs_path = $::hostname ? {
-		default			=> "${hadoop_user_path}/hdfs",
-	}
-
  	$hadoop_tmp_path = $::hostname ? {
 		default			=> "${hadoop_user_path}/tmp",
 	}

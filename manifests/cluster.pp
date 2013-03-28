@@ -10,7 +10,7 @@ class hadoop::cluster::master {
     require hadoop
 
     exec { "Format namenode":
-        command => "./hadoop namenode -format",
+        command => "./hdfs namenode -format",
         user => "${hadoop::params::hadoop_user}",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/bin",
         creates => "${hadoop::params::hadoop_tmp_path}/dfs/name/current/VERSION",
