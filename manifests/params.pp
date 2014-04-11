@@ -5,7 +5,7 @@ class hadoop::params {
 	include java::params
 
 	$version = $::hostname ? {
-		default			=> "2.0.3-alpha",
+		default			=> "2.2.0",
 	}
 
  	$hadoop_user = $::hostname ? {
@@ -17,31 +17,31 @@ class hadoop::params {
 	}
         
 	$master = $::hostname ? {
-		default			=> "master.hadoop",
+		default			=> "localhost",
 	}
- 
+
+	$slaves = $::hostname ? {
+		default			=> ["localhost"],
+	}
+
 	$resourcemanager = $::hostname ? {
-		default			=> "master.hadoop",
+		default			=> "localhost",
 	}
         
-	$slaves = $::hostname ? {
-		default			=> ["slave01.hadoop", "slave02.hadoop"] 
-	}
- 
 	$resource_tracker_port = $::hostname ? {
-		default			=> "8025",
+		default			=> "8031",
 	}
 
  	$scheduler_port = $::hostname ? {
 		default			=> "8030",
 	}
 
-    $scheduler_class = $::hostname ? {
+    	$scheduler_class = $::hostname ? {
 		default			=> "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler",
 	}
  
 	$resourcemanager_port = $::hostname ? {
-		default			=> "8040",
+		default			=> "8032",
 	}
  
 	$hdfsport = $::hostname ? {
@@ -49,7 +49,7 @@ class hadoop::params {
 	}
 
 	$replication = $::hostname ? {
-		default			=> "3",
+		default			=> "1",
 	}
 
 	#$jobtrackerport = $::hostname ? {
@@ -72,9 +72,13 @@ class hadoop::params {
 		default			=> "${hadoop_base}/hadoop/conf",
 	}
  
-    $hadoop_user_path = $::hostname ? {
+    	$hadoop_user_path = $::hostname ? {
 		default			=> "/home/${hadoop_user}",
 	}             
+
+	#$hdfs_path = $::hostname ? {
+	#	default			=> "${hadoop_user_path}/hdfs",
+	#}
 
  	$hadoop_tmp_path = $::hostname ? {
 		default			=> "${hadoop_user_path}/tmp",

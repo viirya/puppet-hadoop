@@ -54,6 +54,14 @@ class hadoop {
 		require => File["${hadoop::params::hadoop_user}-home"]
 	}
  
+	#file {"${hadoop::params::hdfs_path}":
+	#	ensure => "directory",
+	#	owner => "${hadoop::params::hadoop_user}",
+	#	group => "${hadoop::params::hadoop_group}",
+	#	alias => "hdfs-dir",
+	#	require => File["${hadoop::params::hadoop_user}-home"]
+	#}
+	
 	file {"${hadoop::params::hadoop_base}":
 		ensure => "directory",
 		owner => "${hadoop::params::hadoop_user}",
@@ -70,31 +78,43 @@ class hadoop {
         before => [ File["core-site-xml"], File["hdfs-site-xml"], File["mapred-site-xml"], File["yarn-site-xml"], File["yarn-env-sh"], File["hadoop-env-sh"], File["capacity-scheduler-xml"]]
 	}
  
-# file {"${hadoop::params::yarn_conf}":
-# 	ensure => "directory",
-# 	owner => "${hadoop::params::hadoop_user}",
-# 	group => "${hadoop::params::hadoop_group}",
-# 	alias => "yarn-conf",
-#     require => [File["hadoop-base"], Exec["untar-hadoop"]],
-# }
+    # file {"${hadoop::params::yarn_conf}":
+    # 	ensure => "directory",
+    # 	owner => "${hadoop::params::hadoop_user}",
+    # 	group => "${hadoop::params::hadoop_group}",
+    # 	alias => "yarn-conf",
+    #     require => [File["hadoop-base"], Exec["untar-hadoop"]],
+    # }
     
-	file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}.tar.gz":
-		mode => 0644,
-		owner => "${hadoop::params::hadoop_user}",
-		group => "${hadoop::params::hadoop_group}",
-		source => "puppet:///modules/hadoop/hadoop-${hadoop::params::version}.tar.gz",
-		alias => "hadoop-source-tgz",
+    #file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}.tar.gz":
+    #	mode => 0644,
+    #	owner => "${hadoop::params::hadoop_user}",
+    #	group => "${hadoop::params::hadoop_group}",
+    #	source => "puppet:///modules/hadoop/hadoop-${hadoop::params::version}.tar.gz",
+    #	alias => "hadoop-source-tgz",
+    #	before => Exec["untar-hadoop"],
+    #	require => File["hadoop-base"]
+    #}
+ 
+	exec { "download hadoop-${hadoop::params::version}.tar.gz":
+		command => "wget http://apache.stu.edu.tw/hadoop/common/hadoop-${hadoop::params::version}/hadoop-${hadoop::params::version}.tar.gz",
+		cwd => "${hadoop::params::hadoop_base}",
+		alias => "download-hadoop",
+		user => "${hadoop::params::hadoop_user}",
 		before => Exec["untar-hadoop"],
-		require => File["hadoop-base"]
+        require => File["hadoop-base"],
+        path    => ["/bin", "/usr/bin", "/usr/sbin"],
+        onlyif => "test -d ${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}",
+        creates => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}.tar.gz",
 	}
-	
+    
 	exec { "untar hadoop-${hadoop::params::version}.tar.gz":
 		command => "tar xfvz hadoop-${hadoop::params::version}.tar.gz",
 		cwd => "${hadoop::params::hadoop_base}",
 		creates => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}",
 		alias => "untar-hadoop",
 		refreshonly => true,
-		subscribe => File["hadoop-source-tgz"],
+		subscribe => Exec["download-hadoop"],
 		user => "${hadoop::params::hadoop_user}",
 		before => [ File["hadoop-symlink"], File["hadoop-app-dir"]],
         path    => ["/bin", "/usr/bin", "/usr/sbin"],
@@ -115,7 +135,7 @@ class hadoop {
 		alias => "hadoop-symlink",
 		owner => "${hadoop::params::hadoop_user}",
 		group => "${hadoop::params::hadoop_group}",
-		require => File["hadoop-source-tgz"],
+		require => [Exec["untar-hadoop"], File["hadoop-app-dir"]],
 		before => [ File["core-site-xml"], File["hdfs-site-xml"], File["mapred-site-xml"], File["yarn-site-xml"], File["yarn-env-sh"], File["hadoop-env-sh"], File["capacity-scheduler-xml"]]
 	}
 	
@@ -175,21 +195,21 @@ class hadoop {
 		content => template("hadoop/conf/yarn-site.xml.erb"),		
 	}
 
-    file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/conf/masters":
-        owner => "${hadoop::params::hadoop_user}",
-        group => "${hadoop::params::hadoop_group}",
-        mode => "644",
-        alias => "hadoop-master",
-        content => template("hadoop/conf/masters.erb"),
-    }
+	file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/conf/masters":
+	    	owner => "${hadoop::params::hadoop_user}",
+	    	group => "${hadoop::params::hadoop_group}",
+	    	mode => "644",
+	    	alias => "hadoop-master",
+	    	content => template("hadoop/conf/masters.erb"),
+	}
 
-    file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/conf/slaves":
-        owner => "${hadoop::params::hadoop_user}",
-        group => "${hadoop::params::hadoop_group}",
-        mode => "644",
-        alias => "hadoop-slave",
-        content => template("hadoop/conf/slaves.erb"),
-    }
+	file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/conf/slaves":
+	    owner => "${hadoop::params::hadoop_user}",
+	    group => "${hadoop::params::hadoop_group}",
+	    mode => "644",
+	    alias => "hadoop-slave",
+	    content => template("hadoop/conf/slaves.erb"),
+	}
     
 	file { "${hadoop::params::hadoop_user_path}/.ssh/":
 		owner => "${hadoop::params::hadoop_user}",

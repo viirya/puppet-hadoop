@@ -1,5 +1,5 @@
 # Set Users path
-export PATH=$PATH:/bin:<%= scope.lookupvar('hadoop::params::java_home') %>/bin:<%= scope.lookupvar('hadoop::params::hadoop_base') %>/hadoop/bin
+export PATH=/bin:<%= scope.lookupvar('hadoop::params::java_home') %>/bin:<%= scope.lookupvar('hadoop::params::hadoop_base') %>/hadoop/bin:$PATH
 
 # Set Hadoop-related environment variables
 export HADOOP_HOME=<%= scope.lookupvar('hadoop::params::hadoop_base') %>/hadoop
