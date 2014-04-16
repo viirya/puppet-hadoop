@@ -18,6 +18,7 @@ class hadoop::cluster::pseudomode {
         path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/bin"],
         #before => [Exec["start-namenode"], Exec["start-datanodes"], Exec["start-resourcemanager"], Exec["start-nodemanager"], Exec["start-historyserver"]],
         require => File["hadoop-master"],
+	before => Exec["start-dfs"],
     }
  
     exec { "Start DFS services":
