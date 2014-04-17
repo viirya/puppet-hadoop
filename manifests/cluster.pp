@@ -1,7 +1,7 @@
 # /etc/puppet/modules/hadoop/manifests/master.pp
 
 class hadoop::cluster {
-	# do nothing, magic lookup helper
+    # do nothing, magic lookup helper
 }
 
 class hadoop::cluster::pseudomode {
@@ -18,7 +18,7 @@ class hadoop::cluster::pseudomode {
         path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/bin"],
         #before => [Exec["start-namenode"], Exec["start-datanodes"], Exec["start-resourcemanager"], Exec["start-nodemanager"], Exec["start-historyserver"]],
         require => File["hadoop-master"],
-	before => Exec["start-dfs"],
+        before => Exec["start-dfs"],
     }
  
     exec { "Start DFS services":
@@ -39,6 +39,16 @@ class hadoop::cluster::pseudomode {
         require => Exec["start-dfs"],
         path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin"],
         onlyif => "test 0 -eq $(${hadoop::params::java_home}/bin/jps | grep -c ResourceManager)",
+        before => Exec["start-historyserver"],
+    }
+ 
+    exec { "Start historyserver":
+        command => "./mr-jobhistory-daemon.sh start historyserver",
+        cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin",
+        user => "${hadoop::params::hadoop_user}",
+        alias => "start-historyserver",
+        path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin"],
+        require => Exec["start-yarn"],
     }
  
     #exec { "Start namenode":
