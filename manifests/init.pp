@@ -52,6 +52,14 @@ class hadoop {
         home => "${hadoop::params::mapred_user_path}",
         require => Group["hadoop"],
     }
+ 
+    file { "/etc/profile.d/hadoop.sh":
+        ensure => present,
+        owner => "root",
+        group => "root",
+        alias => "profile-hadoop",
+        content => template("hadoop/home/bash_profile.erb"),
+    }
      
     file { "${hadoop::params::hadoop_user_path}/.bashrc":
         ensure => present,
@@ -61,7 +69,7 @@ class hadoop {
         content => template("hadoop/home/bashrc.erb"),
         require => User["${hadoop::params::hadoop_user}"]
     }
- 
+    
     file { "${hadoop::params::hdfs_user_path}/.bashrc":
         ensure => present,
         owner => "${hadoop::params::hdfs_user}",
@@ -70,7 +78,7 @@ class hadoop {
         content => template("hadoop/home/bashrc.erb"),
         require => User["${hadoop::params::hdfs_user}"]
     }
- 
+    
     file { "${hadoop::params::yarn_user_path}/.bashrc":
         ensure => present,
         owner => "${hadoop::params::yarn_user}",
@@ -79,7 +87,7 @@ class hadoop {
         content => template("hadoop/home/bashrc.erb"),
         require => User["${hadoop::params::yarn_user}"]
     }
- 
+    
     file { "${hadoop::params::mapred_user_path}/.bashrc":
         ensure => present,
         owner => "${hadoop::params::mapred_user}",
