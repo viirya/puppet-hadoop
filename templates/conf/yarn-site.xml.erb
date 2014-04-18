@@ -24,4 +24,14 @@
   <name>yarn.resourcemanager.address</name>
   <value><%= scope.lookupvar('hadoop::params::resourcemanager') %>:<%= scope.lookupvar('hadoop::params::resourcemanager_port') %></value>
 </property>
+<!--
+<property>
+  <name>yarn.nodemanager.local-dirs</name>
+  <value><%= scope.lookupvar('hadoop::params::yarn_nodemanager_localdirs') %></value>
+</property>
+<property>
+  <name>yarn.nodemanager.log-dirs</name>
+  <value><%= scope.lookupvar('hadoop::params::yarn_nodemanager_logdirs') %></value>
+</property>
+-->
 </configuration>

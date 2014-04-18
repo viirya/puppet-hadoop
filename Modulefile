@@ -1,5 +1,5 @@
 name    'viirya-hadoop'
-version '0.0.7'
+version '0.0.8'
 author 'Liang-Chi Hsieh'
 dependency 'viirya/java', '0.0.3'
 summary 'Install Hadoop MapReduce Next Generation.'

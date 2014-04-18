@@ -11,7 +11,7 @@ class hadoop::cluster::pseudomode {
 
     exec { "Format namenode":
         command => "./hdfs namenode -format",
-        user => "${hadoop::params::hadoop_user}",
+        user => "${hadoop::params::hdfs_user}",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/bin",
         creates => "${hadoop::params::hadoop_tmp_path}/dfs/name/current/VERSION",
         alias => "format-hdfs",
@@ -20,11 +20,11 @@ class hadoop::cluster::pseudomode {
         require => File["hadoop-master"],
         before => Exec["start-dfs"],
     }
- 
+
     exec { "Start DFS services":
         command => "./start-dfs.sh",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin",
-        user => "${hadoop::params::hadoop_user}",
+        user => "${hadoop::params::hdfs_user}",
         alias => "start-dfs",
         path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin"],
         before => [Exec["start-yarn"]],
@@ -34,7 +34,7 @@ class hadoop::cluster::pseudomode {
     exec { "Start YARN services":
         command => "./start-yarn.sh",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin",
-        user => "${hadoop::params::hadoop_user}",
+        user => "${hadoop::params::yarn_user}",
         alias => "start-yarn",
         require => Exec["start-dfs"],
         path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin"],
@@ -45,11 +45,22 @@ class hadoop::cluster::pseudomode {
     exec { "Start historyserver":
         command => "./mr-jobhistory-daemon.sh start historyserver",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin",
-        user => "${hadoop::params::hadoop_user}",
+        user => "${hadoop::params::mapred_user}",
         alias => "start-historyserver",
         path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin"],
         require => Exec["start-yarn"],
+        onlyif => "test 0 -eq $(${hadoop::params::java_home}/bin/jps | grep -c JobHistoryServer)",
     }
+ 
+    exec { "Set /tmp mode":
+        command => "./hdfs dfs -chmod -R 1777 /tmp; ./hdfs dfs -chown -R ${hadoop::params::hdfs_user} /tmp; touch ${hadoop::params::hdfs_user_path}/tmp_init_done",
+        user => "${hadoop::params::hdfs_user}",
+        cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/bin",
+        creates => "${hadoop::params::hdfs_user_path}/tmp_init_done",
+        alias => "set-tmp",
+        path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/bin"],
+        require => Exec["start-historyserver"],
+    } 
  
     #exec { "Start namenode":
     #    command => "./hadoop-daemon.sh start namenode",
@@ -102,7 +113,7 @@ class hadoop::cluster::master {
 
     exec { "Format namenode":
         command => "./hdfs namenode -format",
-        user => "${hadoop::params::hadoop_user}",
+        user => "${hadoop::params::hdfs_user}",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/bin",
         creates => "${hadoop::params::hadoop_tmp_path}/dfs/name/current/VERSION",
         alias => "format-hdfs",
@@ -114,7 +125,7 @@ class hadoop::cluster::master {
     exec { "Start namenode":
         command => "./hadoop-daemon.sh start namenode",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin",
-        user => "${hadoop::params::hadoop_user}",
+        user => "${hadoop::params::hdfs_user}",
         alias => "start-namenode",
         path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin"],
         before => [Exec["start-datanodes"], Exec["start-resourcemanager"], Exec["start-nodemanager"], Exec["start-historyserver"]],
@@ -123,7 +134,7 @@ class hadoop::cluster::master {
     exec { "Start datanodes":
         command => "./hadoop-daemons.sh start datanode",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin",
-        user => "${hadoop::params::hadoop_user}",
+        user => "${hadoop::params::hdfs_user}",
         alias => "start-datanodes",
         path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin"],
         before => [Exec["start-resourcemanager"], Exec["start-nodemanager"], Exec["start-historyserver"]],
@@ -131,7 +142,7 @@ class hadoop::cluster::master {
     exec { "Start resourcemanager":
         command => "./yarn-daemon.sh start resourcemanager",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin",
-        user => "${hadoop::params::hadoop_user}",
+        user => "${hadoop::params::yarn_user}",
         alias => "start-resourcemanager",
         path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin"],
         before => [Exec["start-nodemanager"], Exec["start-historyserver"]],
@@ -139,7 +150,7 @@ class hadoop::cluster::master {
     exec { "Start nodemanager":
         command => "./yarn-daemons.sh start nodemanager",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin",
-        user => "${hadoop::params::hadoop_user}",
+        user => "${hadoop::params::yarn_user}",
         alias => "start-nodemanager",
         path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin"],
         before => Exec["start-historyserver"],
@@ -148,7 +159,7 @@ class hadoop::cluster::master {
     exec { "Start historyserver":
         command => "./mr-jobhistory-daemon.sh start historyserver",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin",
-        user => "${hadoop::params::hadoop_user}",
+        user => "${hadoop::params::mapred_user}",
         alias => "start-historyserver",
         path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin"],
     }
