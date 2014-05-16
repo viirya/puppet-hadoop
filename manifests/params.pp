@@ -116,6 +116,18 @@ class hadoop::params {
         default            => "${hadoop_base}/hadoop/yarn_log",
     }
 
+    $kerberos_mode = $::hostname ? {
+        default            => "yes",
+    }
+
+    $keytab_path = $::hostname ? {
+        default            => "/etc/security/keytab",
+    }
+
+    $kerberos_realm = $::hostname ? {
+        default            => "OPENSTACKLOCAL",
+    }
+
     #$yarn_nodemanager_localdirs = $::hostname ? {
     #    default            => "${yarn_user_path}/nm-local-dir}",
     #}
