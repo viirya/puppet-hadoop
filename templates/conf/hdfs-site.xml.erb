@@ -13,4 +13,76 @@
   <name>dfs.permissions</name>
   <value>false</value>
 </property>
+
+<% if scope.lookupvar('hadoop::params::kerberos_mode') == "yes" %>
+<property>
+        <name>dfs.namenode.kerberos.principal</name> 
+        <value>nn/_HOST@<%= scope.lookupvar('hadoop::params::kerberos_realm') %></value> 
+        <description> Kerberos principal name for the
+        NameNode </description> 
+</property>   
+<property>
+        <name>dfs.namenode.kerberos.https.principal</name> 
+        <value>host/_HOST@<%= scope.lookupvar('hadoop::params::kerberos_realm') %></value> 
+        <description> Kerberos principal name for the
+        NameNode </description> 
+</property>   
+<property>
+        <name>dfs.secondary.namenode.kerberos.principal</name> 
+        <value>sn/_HOST@<%= scope.lookupvar('hadoop::params::kerberos_realm') %></value>    
+        <description>Kerberos principal name for the secondary NameNode.    
+        </description>          
+</property>  
+<property>
+        <name>dfs.namenode.secondary.kerberos.https.principal</name> 
+        <value>host/_HOST@<%= scope.lookupvar('hadoop::params::kerberos_realm') %></value>    
+        <description>Kerberos principal name for the secondary NameNode.    
+        </description>          
+</property>  
+<property>
+        <name>dfs.datanode.kerberos.principal</name> 
+        <value>dn/_HOST@<%= scope.lookupvar('hadoop::params::kerberos_realm') %></value>    
+        <description>The Kerberos principal that the DataNode runs as. "_HOST" is replaced by the real host name.
+         </description>          
+</property> 
+<property>
+        <name>dfs.datanode.kerberos.https.principal</name> 
+        <value>host/_HOST@<%= scope.lookupvar('hadoop::params::kerberos_realm') %></value>    
+        <description>The Kerberos principal that the DataNode runs as. "_HOST" is replaced by the real host name.
+         </description>          
+</property> 
+<property>
+        <name>dfs.web.authentication.kerberos.principal</name> 
+        <value>host/_HOST@<%= scope.lookupvar('hadoop::params::kerberos_realm') %></value>    
+        <description>The HTTP Kerberos principal used by Hadoop-Auth in the HTTP endpoint.
+         </description>          
+</property>  
+
+
+<property>
+        <name>dfs.namenode.keytab.file</name> 
+        <value><%= scope.lookupvar('hadoop::params::keytab_path') %>/nn.service.keytab</value>    
+        <description>Combined keytab file containing the namenode service and host principals.   
+        </description>          
+</property>  
+<property>
+        <name>dfs.secondary.namenode.keytab.file</name> 
+        <value><%= scope.lookupvar('hadoop::params::keytab_path') %>/sn.service.keytab</value>    
+        <description>Combined keytab file containing the namenode service and host principals.   
+        </description>          
+</property>  
+<property>
+        <name>dfs.datanode.keytab.file</name> 
+        <value><%= scope.lookupvar('hadoop::params::keytab_path') %>/dn.service.keytab</value>    
+        <description>The filename of the keytab file for the DataNode.   
+        </description>          
+</property>  
+<property>
+        <name>dfs.web.authentication.kerberos.keytab</name> 
+        <value><%= scope.lookupvar('hadoop::params::keytab_path') %>/dn.service.keytab</value>    
+        <description>The Kerberos keytab file with the credentials for the HTTP Kerberos principal used by Hadoop-Auth in the HTTP endpoint.    
+        </description>          
+</property>
+
+<% end %>
 </configuration>

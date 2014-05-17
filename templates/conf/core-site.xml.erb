@@ -15,4 +15,14 @@
   the FileSystem implementation class.  The uri's authority is used to
   determine the host, port, etc. for a filesystem.</description>
 </property>
+
+<% if scope.lookupvar('hadoop::params::kerberos_mode') == "yes" %>
+<property>   
+        <name>hadoop.security.authentication</name>   
+        <value>kerberos</value>   
+        <description>Set the authentication for the cluster. Valid values are: simple or kerberos.   
+        </description>  
+</property> 
+<% end %>
+
 </configuration>

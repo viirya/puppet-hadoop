@@ -11,4 +11,20 @@
   <value>/yarn_tmp</value>
 </property>
 -->
+
+<% if scope.lookupvar('hadoop::params::kerberos_mode') == "yes" %>
+<property>
+        <name>mapreduce.jobhistory.principal</name>
+        <value>jhs/_HOST@<%= scope.lookupvar('hadoop::params::kerberos_realm') %></value>
+        <description> Kerberos principal name for the JobHistory Server </description>
+</property>
+
+<property>
+        <name>mapreduce.jobhistory.keytab</name>        
+        <value><%= scope.lookupvar('hadoop::params::keytab_path') %>/jhs.service.keytab</value>
+        <description>Combined keytab file containing the jobhistory service and host principals.
+        </description>
+</property>
+<% end %>
+
 </configuration>

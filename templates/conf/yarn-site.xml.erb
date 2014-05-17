@@ -34,4 +34,33 @@
   <value><%= scope.lookupvar('hadoop::params::yarn_nodemanager_logdirs') %></value>
 </property>
 -->
+
+<% if scope.lookupvar('hadoop::params::kerberos_mode') == "yes" %>
+<property>
+        <name>yarn.resourcemanager.principal</name>
+        <value>rm/_HOST@<%= scope.lookupvar('hadoop::params::kerberos_realm') %></value>
+        <description> Kerberos principal name for the ResourceManager </description>
+</property>
+<property>
+        <name>yarn.nodemanager.principal</name>
+        <value>nm/_HOST@<%= scope.lookupvar('hadoop::params::kerberos_realm') %></value>
+        <description> Kerberos principal name for the NodeManager </description>
+</property>
+ 
+<property>        
+        <name>yarn.resourcemanager.keytab</name>
+        <value><%= scope.lookupvar('hadoop::params::keytab_path') %>/rm.service.keytab</value>
+        <description>Combined keytab file containing the resourcemanager service and host principals.
+        </description>
+</property>
+<property>        
+        <name>yarn.nodemanager.keytab</name>
+        <value><%= scope.lookupvar('hadoop::params::keytab_path') %>/nm.service.keytab</value>
+        <description>Combined keytab file containing the nodemanager service and host principals.
+        </description>
+</property>
+ 
+<% end %>
+
+
 </configuration>
