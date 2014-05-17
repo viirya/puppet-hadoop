@@ -143,7 +143,8 @@ class hadoop::cluster::kerberos {
         file { "${hadoop::params::keytab_path}":
             ensure => "directory",
             owner => "root",
-            group => "root",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "750",
             alias => "keytab-path",
             require => [ File["hadoop-master"], File["hadoop-slave"] ],
         }
@@ -327,7 +328,8 @@ class hadoop::cluster::slave {
         file { "${hadoop::params::keytab_path}":
             ensure => "directory",
             owner => "root",
-            group => "root",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "750",
             alias => "keytab-path",
             require => [ File["hadoop-master"], File["hadoop-slave"] ],
         }
@@ -335,8 +337,8 @@ class hadoop::cluster::slave {
         file { "${hadoop::params::keytab_path}/dn.service.keytab":
             ensure => present,
             owner => "root",
-            group => "root",
-            mode => "700",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "440",
             source => "puppet:///modules/hadoop/keytab/${fqdn}.dn.service.keytab",
             require => File["keytab-path"],
         }
@@ -344,8 +346,8 @@ class hadoop::cluster::slave {
         file { "${hadoop::params::keytab_path}/nm.service.keytab":
             ensure => present,
             owner => "root",
-            group => "root",
-            mode => "700",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "440",
             source => "puppet:///modules/hadoop/keytab/${fqdn}.nm.service.keytab",
             require => File["keytab-path"],
         }
