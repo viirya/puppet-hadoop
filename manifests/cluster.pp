@@ -322,4 +322,34 @@ class hadoop::cluster::slave {
     require hadoop::params
     require hadoop
 
+    if $hadoop::params::kerberos_mode == "yes" {
+ 
+        file { "${hadoop::params::keytab_path}":
+            ensure => "directory",
+            owner => "root",
+            group => "root",
+            alias => "keytab-path",
+            require => [ File["hadoop-master"], File["hadoop-slave"] ],
+        }
+ 
+        file { "${hadoop::params::keytab_path}/dn.service.keytab":
+            ensure => present,
+            owner => "root",
+            group => "root",
+            mode => "700",
+            source => "puppet:///modules/hadoop/keytab/${fqdn}.dn.service.keytab",
+            require => File["keytab-path"],
+        }
+ 
+        file { "${hadoop::params::keytab_path}/nm.service.keytab":
+            ensure => present,
+            owner => "root",
+            group => "root",
+            mode => "700",
+            source => "puppet:///modules/hadoop/keytab/${fqdn}.nm.service.keytab",
+            require => File["keytab-path"],
+        }
+ 
+    }
+
 }
