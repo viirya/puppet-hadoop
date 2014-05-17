@@ -488,5 +488,4 @@ class hadoop {
         source => "puppet:///modules/hadoop/ssh/id_rsa.pub",
         require => File["${hadoop::params::mapred_user}-ssh-dir"],
     }
-
 }

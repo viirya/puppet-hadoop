@@ -21,7 +21,18 @@ define nodemanagerprinciple {
         onlyif => "test ! -e ${hadoop::params::keytab_path}/${name}.nm.service.keytab",
     }
 }
-
+ 
+define masterhostprinciple {
+    exec { "create host principle ${name}":
+        command => "kadmin.local -q 'addprinc -randkey host/$name@${hadoop::params::kerberos_realm}'",
+        user => "root",
+        group => "root",
+        path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
+        alias => "add-princ-host-${name}",
+        onlyif => "test (! -e ${hadoop::params::keytab_path}/nn.service.keytab) -a (! -e ${hadoop::params::keytab_path}/sn.service.keytab) -a (! -e ${hadoop::params::keytab_path}/rm.service.keytab) -a (! -e ${hadoop::params::keytab_path}/jhs.service.keytab)",
+    }
+}
+ 
 define hostprinciple {
     exec { "create host principle ${name}":
         command => "kadmin.local -q 'addprinc -randkey host/$name@${hadoop::params::kerberos_realm}'",
@@ -165,7 +176,7 @@ class hadoop::cluster::kerberos {
             require => File["keytab-path"],
         }
 
-        hostprinciple { $hadoop::params::master:
+        masterhostprinciple { $hadoop::params::master:
             require => File["keytab-path"],
             before  => Exec["create-keytab-nn"],
         } 
@@ -229,7 +240,7 @@ class hadoop::cluster::kerberos {
             alias => "create-keytab-rm",
             path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
             require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"] ],
-            onlyif => "test ! -e ${hadoop::params::keytab_path}/ rm.service.keytab",
+            onlyif => "test ! -e ${hadoop::params::keytab_path}/rm.service.keytab",
         }
  
         exec { "create JobHistory keytab":
