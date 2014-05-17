@@ -127,6 +127,14 @@ class hadoop::params {
     $kerberos_realm = $::hostname ? {
         default            => "OPENSTACKLOCAL",
     }
+ 
+    $common_base = $::hostname ? {
+        default            => "/opt/jsvc",
+    }
+ 
+    $common_version = $::hostname ? {
+        default            => "1.0.15",
+    }
 
     #$yarn_nodemanager_localdirs = $::hostname ? {
     #    default            => "${yarn_user_path}/nm-local-dir}",

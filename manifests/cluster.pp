@@ -52,7 +52,7 @@ define datanodekeytab {
         path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
         onlyif => "test ! -e ${hadoop::params::keytab_path}/${name}.dn.service.keytab",
         alias => "create-keytab-dn-${name}",
-        require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-dn-${name}"], Exec["add-princ-nm-${name}"], Exec["add-princ-host-${name}"] ],
+        require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-dn-${name}"], Exec["add-princ-nm-${name}"], Exec["add-princ-host-${name}"], Exec["add-princ-webhdfs"] ],
     }
 }
  
@@ -65,7 +65,7 @@ define nodemanagerkeytab {
         onlyif => "test ! -e ${hadoop::params::keytab_path}/${name}.nm.service.keytab",
         alias => "create-keytab-nm-${name}",
         require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], 
-Exec["add-princ-dn-${name}"], Exec["add-princ-nm-${name}"], Exec["add-princ-host-${name}"], Exec["create-keytab-dn-${name}"] ],
+Exec["add-princ-dn-${name}"], Exec["add-princ-nm-${name}"], Exec["add-princ-host-${name}"], Exec["create-keytab-dn-${name}"], Exec["add-princ-webhdfs"] ],
 
     }
 }
@@ -208,13 +208,23 @@ class hadoop::cluster::kerberos {
             onlyif => "test ! -e ${hadoop::params::keytab_path}/jhs.service.keytab",
         }
  
+        exec { "create WebHDFS principle":
+            command => "kadmin.local -q 'addprinc -randkey http/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
+            user => "root",
+            group => "root",
+            alias => "add-princ-webhdfs",
+            path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
+            require => File["keytab-path"],
+            onlyif => "test ! -e ${hadoop::params::keytab_path}/http.service.keytab",
+        }
+ 
         exec { "create NameNode keytab":
             command => "kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/nn.service.keytab nn/${hadoop::params::master}@${hadoop::params::kerberos_realm}'; kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/nn.service.keytab host/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
             user => "root",
             group => "root",
             alias => "create-keytab-nn",
             path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
-            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"] ],
+            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"], Exec["add-princ-webhdfs"] ],
             onlyif => "test ! -e ${hadoop::params::keytab_path}/nn.service.keytab",
         }
  
@@ -224,7 +234,7 @@ class hadoop::cluster::kerberos {
             group => "root",
             alias => "create-keytab-sn",
             path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
-            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"] ],
+            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"], Exec["add-princ-webhdfs"] ],
             onlyif => "test ! -e ${hadoop::params::keytab_path}/sn.service.keytab",
         }
 
@@ -240,7 +250,7 @@ class hadoop::cluster::kerberos {
             group => "root",
             alias => "create-keytab-rm",
             path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
-            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"] ],
+            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"], Exec["add-princ-webhdfs"] ],
             onlyif => "test ! -e ${hadoop::params::keytab_path}/rm.service.keytab",
         }
  
@@ -250,8 +260,18 @@ class hadoop::cluster::kerberos {
             group => "root",
             alias => "create-keytab-jhs",
             path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
-            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"] ],
+            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"], Exec["add-princ-webhdfs"] ],
             onlyif => "test ! -e ${hadoop::params::keytab_path}/jhs.service.keytab",
+        }
+ 
+        exec { "create WebHDFS keytab":
+            command => "kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/http.service.keytab http/${hadoop::params::master}@${hadoop::params::kerberos_realm}'; kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/http.service.keytab host/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
+            user => "root",
+            group => "root",
+            alias => "create-keytab-http",
+            path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
+            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"], Exec["add-princ-webhdfs"] ],
+            onlyif => "test ! -e ${hadoop::params::keytab_path}/http.service.keytab",
         }
         
     }        
@@ -284,7 +304,19 @@ class hadoop::cluster::master {
         before => [Exec["start-yarn"]],
         onlyif => "test 0 -eq $(${hadoop::params::java_home}/bin/jps | grep -c NameNode)",
     }
- 
+
+    if $hadoop::params::kerberos_mode == "yes" {
+        exec { "Start Secure DFS services":
+            command => "sudo HADOOP_SECURE_DN_USER=${hadoop::params::hdfs_user} ./start-secure-dns.sh",
+            cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin",
+            user => "${hadoop::params::hdfs_user}",
+            alias => "start-secure-dfs",
+            path    => ["/bin", "/usr/bin", "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin"],
+            before => [Exec["start-yarn"]],
+            require => [Exec["start-dfs"]],
+        }
+    }
+
     exec { "Start YARN services":
         command => "./start-yarn.sh",
         cwd => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/sbin",

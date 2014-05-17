@@ -10,6 +10,13 @@ export YARN_HOME=$HADOOP_HOME
 export HADOOP_CONF_DIR=<%= scope.lookupvar('hadoop::params::hadoop_conf') %>
 export YARN_CONF_DIR=<%= scope.lookupvar('hadoop::params::yarn_conf') %>
 
+<% if scope.lookupvar('hadoop::params::kerberos_mode') == "yes" %>
+
+export HADOOP_SECURE_DN_USER=<%= scope.lookupvar('hadoop::params::hdfs_user') %>
+export JSVC_HOME=<%= scope.lookupvar('hadoop::params::common_base') %>/jsvc/src/native/unix
+
+<% end %>
+
 # Set JAVA_HOME (we will also configure JAVA_HOME directly for Hadoop later on)
 export JAVA_HOME=<%= scope.lookupvar('hadoop::params::java_home') %>
 

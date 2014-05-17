@@ -16,6 +16,24 @@
 
 <% if scope.lookupvar('hadoop::params::kerberos_mode') == "yes" %>
 <property>
+        <name>dfs.datanode.data.dir.perm</name>
+        <value>700</value>
+</property>
+
+<property>        
+        <name>dfs.datanode.address</name>
+        <value>0.0.0.0:1004</value>
+</property>
+<property>
+        <name>dfs.datanode.http.address</name>
+        <value>0.0.0.0:1006</value>
+</property>
+<property>
+        <name>dfs.datanode.https.address</name>
+        <value>0.0.0.0:50470</value>
+</property>
+
+<property>
         <name>dfs.namenode.kerberos.principal</name> 
         <value>nn/_HOST@<%= scope.lookupvar('hadoop::params::kerberos_realm') %></value> 
         <description> Kerberos principal name for the
@@ -53,7 +71,7 @@
 </property> 
 <property>
         <name>dfs.web.authentication.kerberos.principal</name> 
-        <value>host/_HOST@<%= scope.lookupvar('hadoop::params::kerberos_realm') %></value>    
+        <value>http/_HOST@<%= scope.lookupvar('hadoop::params::kerberos_realm') %></value>    
         <description>The HTTP Kerberos principal used by Hadoop-Auth in the HTTP endpoint.
          </description>          
 </property>  
@@ -79,7 +97,7 @@
 </property>  
 <property>
         <name>dfs.web.authentication.kerberos.keytab</name> 
-        <value><%= scope.lookupvar('hadoop::params::keytab_path') %>/dn.service.keytab</value>    
+        <value><%= scope.lookupvar('hadoop::params::keytab_path') %>/http.service.keytab</value>    
         <description>The Kerberos keytab file with the credentials for the HTTP Kerberos principal used by Hadoop-Auth in the HTTP endpoint.    
         </description>          
 </property>

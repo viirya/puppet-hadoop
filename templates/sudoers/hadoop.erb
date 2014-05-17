@@ -1,0 +1,7 @@
+
+<% if scope.lookupvar('hadoop::params::kerberos_mode') == "yes" %>
+
+# User rules for <%= scope.lookupvar('hadoop::params::hdfs_user') %>
+<%= scope.lookupvar('hadoop::params::hdfs_user') %> ALL=(ALL) NOPASSWD:ALL
+
+<% end %>

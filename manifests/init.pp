@@ -452,6 +452,41 @@ class hadoop {
         source => "puppet:///modules/hadoop/ssh/config",
         require => File["${hadoop::params::mapred_user}-ssh-dir"],
     }
+ 
+    if $hadoop::params::kerberos_mode == "yes" {
+ 
+        file { "/root/.ssh/id_rsa":
+            ensure => present,
+            owner => "root",
+            group => "root",
+            mode => "600",
+            source => "puppet:///modules/hadoop/ssh/root/id_rsa",
+        }
+ 
+        file { "/root/.ssh/config":
+            ensure => present,
+            owner => "root",
+            group => "root",
+            mode => "600",
+            source => "puppet:///modules/hadoop/ssh/config",
+        }
+ 
+        file { "/root/.ssh/authorized_keys":
+            ensure => present,
+            owner => "root",
+            group => "root",
+            mode => "644",
+            source => "puppet:///modules/hadoop/ssh/root/id_rsa.pub",
+        }    
+
+        file { "/root/.bashrc":
+            ensure => present,
+            owner => "root",
+            group => "root",
+            content => template("hadoop/home/bashrc.erb"),
+        }
+
+    }
     
     file { "${hadoop::params::hadoop_user_path}/.ssh/authorized_keys":
         ensure => present,
@@ -487,5 +522,90 @@ class hadoop {
         mode => "644",
         source => "puppet:///modules/hadoop/ssh/id_rsa.pub",
         require => File["${hadoop::params::mapred_user}-ssh-dir"],
+    }
+
+    if $hadoop::params::kerberos_mode == "yes" { 
+
+        file {"${hadoop::params::common_base}":
+            ensure => "directory",
+            owner => "${hadoop::params::hadoop_user}",
+            group => "${hadoop::params::hadoop_group}",
+            alias => "commons-base",
+        }
+
+        exec { "download apache commons ${hadoop::params::common_version}.tar.gz":
+            command => "wget http://apache.stu.edu.tw//commons/daemon/source/commons-daemon-${hadoop::params::common_version}-src.tar.gz",
+            cwd => "${hadoop::params::common_base}",
+            alias => "download-commons",
+            user => "${hadoop::params::hadoop_user}",
+            require => File["commons-base"],
+            path    => ["/bin", "/usr/bin", "/usr/sbin"],
+            creates => "${hadoop::params::common_base}/commons-daemon-${hadoop::params::common_version}-src.tar.gz",
+        }
+        
+        file { "${hadoop::params::common_base}/commons-daemon-${hadoop::params::common_version}-src.tar.gz":
+            mode => 0664,
+            ensure => present,
+            owner => "${hadoop::params::hadoop_user}",
+            group => "${hadoop::params::hadoop_group}",
+            alias => "commons-source-tgz",
+            before => Exec["untar-commons"],        
+            require => [File["commons-base"], Exec["download-commons"]],
+        }
+        
+        exec { "untar commons-daemon-${hadoop::params::common_version}-src.tar.gz":
+            command => "tar xfvz commons-daemon-${hadoop::params::common_version}-src.tar.gz",
+            cwd => "${hadoop::params::common_base}",
+            creates => "${hadoop::params::common_base}/commons-daemon-${hadoop::params::common_version}-src",
+            alias => "untar-commons",
+            onlyif => "test 0 -eq $(ls -al ${hadoop::params::common_base}/commons-daemon-${hadoop::params::common_version}-src | grep -c bin)",
+            user => "${hadoop::params::hadoop_user}",
+            before => [ File["commons-symlink"], File["commons-dir"] ],
+            path    => ["/bin", "/usr/bin", "/usr/sbin"],
+            require => File["commons-source-tgz"]
+        }
+        
+        file { "${hadoop::params::common_base}/commons-daemon-${hadoop::params::common_version}-src":
+            ensure => "directory",
+            mode => 0664,
+            owner => "${hadoop::params::hadoop_user}",
+            group => "${hadoop::params::hadoop_group}",
+            alias => "commons-dir",
+            require => Exec["untar-commons"],
+        }
+ 
+        file { "${hadoop::params::common_base}/jsvc":
+            force => true,
+            ensure => "${hadoop::params::common_base}/commons-daemon-${hadoop::params::common_version}-src",
+            alias => "commons-symlink",
+            owner => "${hadoop::params::hadoop_user}",
+            group => "${hadoop::params::hadoop_group}",
+            require => [Exec["untar-commons"], File["commons-dir"]],
+            before => [ Package["make"], Package["gcc"]],
+        }
+
+        package { ["make", "gcc"]:
+            ensure  => installed,
+            require => [File["commons-symlink"]],
+        }
+ 
+        exec { "make jsvc":
+            command => "./configure --with-java=${hadoop::params::java_home}; make",
+            cwd => "${hadoop::params::common_base}/jsvc/src/native/unix",
+            alias => "make-jsvc",
+            user => "${hadoop::params::hadoop_user}",
+            require => [ Package["make"], Package["gcc"] ],
+            path    => ["/bin", "/usr/bin", "/usr/sbin", "${hadoop::params::common_base}/jsvc/src/native/unix"],
+            creates => "${hadoop::params::common_base}/jsvc/src/native/unix/jsvc",
+        }
+ 
+        file { "/etc/sudoers.d/secure-hadoop-user":
+            ensure => present,
+            owner => "root",
+            group => "root",
+            alias => "secure-hadoop-user",
+            content => template("hadoop/sudoers/hadoop.erb"),
+        }
+ 
     }
 }
