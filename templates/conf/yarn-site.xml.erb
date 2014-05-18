@@ -59,6 +59,21 @@
         <description>Combined keytab file containing the nodemanager service and host principals.
         </description>
 </property>
+
+
+<property>        
+        <name>yarn.nodemanager.container-executor.class</name>
+        <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
+</property>
+<property>        
+        <name>yarn.nodemanager.linux-container-executor.group</name>
+        <value><%= scope.lookupvar('hadoop::params::hadoop_group') %></value>
+</property>
+<property>        
+        <name>yarn.nodemanager.linux-container-executor.path</name>
+        <value><%= scope.lookupvar('hadoop::params::hadoop_base') %>/hadoop/bin/container-executor</value>
+</property>
+ 
  
 <% end %>
 

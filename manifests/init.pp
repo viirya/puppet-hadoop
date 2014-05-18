@@ -174,9 +174,10 @@ class hadoop {
  
     file {"${hadoop::params::hadoop_base}":
         ensure => "directory",
-        owner => "${hadoop::params::hadoop_user}",
+        owner => "${hadoop::params::hadoop_path_owner}",
         group => "${hadoop::params::hadoop_group}",
         alias => "hadoop-base",
+        mode  => 0755,
     }
 
      file {"${hadoop::params::hadoop_conf}":
@@ -224,8 +225,8 @@ class hadoop {
 
     file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}":
         ensure => "directory",
-        mode => 0664,
-        owner => "${hadoop::params::hadoop_user}",
+        mode => 0755,
+        owner => "${hadoop::params::hadoop_path_owner}",
         group => "${hadoop::params::hadoop_group}",
         alias => "hadoop-app-dir",
         require => Exec["untar-hadoop"],
@@ -235,8 +236,9 @@ class hadoop {
         force => true,
         ensure => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}",
         alias => "hadoop-symlink",
-        owner => "${hadoop::params::hadoop_user}",
+        owner => "${hadoop::params::hadoop_path_owner}",
         group => "${hadoop::params::hadoop_group}",
+        mode  => 0755,
         require => [Exec["untar-hadoop"], File["hadoop-app-dir"]],
         before => [ File["core-site-xml"], File["hdfs-site-xml"], File["mapred-site-xml"], File["yarn-site-xml"], File["yarn-env-sh"], File["hadoop-env-sh"], File["capacity-scheduler-xml"], File["hadoop-master"], File["hadoop-slave"] ]
     }
@@ -606,6 +608,75 @@ class hadoop {
             alias => "secure-hadoop-user",
             content => template("hadoop/sudoers/hadoop.erb"),
         }
+ 
+        file { "${hadoop::params::hadoop_base}/hadoop/bin/container-executor":
+            ensure => present,
+            owner => "${hadoop::params::hadoop_path_owner}",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "6050",
+            source => "puppet:///modules/hadoop/hadoop/container-executor",
+            require => [ File["hadoop-symlink"], File["hadoop-app-dir"] ],
+        }
+        
+        file { "${hadoop::params::hadoop_base}/hadoop/bin/test-container-executor":
+            ensure => present,
+            owner => "${hadoop::params::hadoop_path_owner}",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "6050",
+            source => "puppet:///modules/hadoop/hadoop/test-container-executor",
+            require => [ File["hadoop-symlink"], File["hadoop-app-dir"] ],
+        }
+ 
+        file { "${hadoop::params::hadoop_base}/hadoop/lib/native/libhadoop.so.1.0.0":
+            ensure => present,
+            owner => "${hadoop::params::hadoop_user}",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "0755",
+            source => "puppet:///modules/hadoop/hadoop/libhadoop.so.1.0.0",
+            require => [ File["hadoop-symlink"], File["hadoop-app-dir"] ],
+        }
+        
+        file { "${hadoop::params::hadoop_base}/hadoop/bin/libhdfs.so.0.0.0":
+            ensure => present,
+            owner => "${hadoop::params::hadoop_user}",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "0755",
+            source => "puppet:///modules/hadoop/hadoop/libhdfs.so.0.0.0",
+            require => [ File["hadoop-symlink"], File["hadoop-app-dir"] ],
+        }
+ 
+        file { "${hadoop::params::hadoop_base}/hadoop/etc/hadoop/container-executor.cfg":
+            ensure => present,
+            owner => "root",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "644",
+            content => template("hadoop/conf/container-executor.cfg.erb"),
+            require => [ File["hadoop-symlink"], File["hadoop-app-dir"] ],
+        }
+ 
+        file { "${hadoop::params::hadoop_base}/hadoop/etc/hadoop":
+            ensure => present,
+            owner => "root",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "755",
+            require => [ File["hadoop-symlink"], File["hadoop-app-dir"] ],
+        }
+ 
+        file { "${hadoop::params::hadoop_base}/hadoop/etc":
+            ensure => present,
+            owner => "root",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "755",
+            require => [ File["hadoop-symlink"], File["hadoop-app-dir"] ],
+        }
+ 
+        #file { "${hadoop::params::hadoop_base}/hadoop":
+        #    ensure => present,
+        #    owner => "root",
+        #    group => "${hadoop::params::hadoop_group}",
+        #    mode => "755",
+        #    require => [ File["hadoop-symlink"], File["hadoop-app-dir"] ],
+        #}
  
     }
 }

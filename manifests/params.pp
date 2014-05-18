@@ -136,6 +136,13 @@ class hadoop::params {
         default            => "1.0.15",
     }
 
+    if $kerberos_mode == "yes" {
+        $hadoop_path_owner = "root"
+    } elsif $kerberos_mode == "no" {
+        $hadoop_path_owner = "${hadoop_user}"
+    }
+
+
     #$yarn_nodemanager_localdirs = $::hostname ? {
     #    default            => "${yarn_user_path}/nm-local-dir}",
     #}
