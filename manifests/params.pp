@@ -8,6 +8,10 @@ class hadoop::params {
         default            => "2.2.0",
     }
 
+    $download_url = $::hostname ? {
+        default            => "http://apache.stu.edu.tw/hadoop/common/hadoop-${version}",
+    }           
+ 
     $hadoop_user = $::hostname ? {
         default            => "hduser",
     }

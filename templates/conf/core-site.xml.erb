@@ -24,6 +24,15 @@
         <description>Set the authentication for the cluster. Valid values are: simple or kerberos.   
         </description>  
 </property> 
+<property>
+        <name>hadoop.security.authorization</name>
+        <value>true</value>
+</property>
+<property>
+        <name>hadoop.rpc.protection</name>
+        <value>authentication</value>
+</property>
+
 <property>   
         <name>hadoop.security.auth_to_local</name>   
         <value>

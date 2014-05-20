@@ -190,10 +190,10 @@ class hadoop {
     }
  
     exec { "download hadoop-${hadoop::params::version}.tar.gz":
-        command => "wget http://apache.stu.edu.tw/hadoop/common/hadoop-${hadoop::params::version}/hadoop-${hadoop::params::version}.tar.gz",
+        command => "wget ${hadoop::params::download_url}/hadoop-${hadoop::params::version}.tar.gz",
         cwd => "${hadoop::params::hadoop_base}",
         alias => "download-hadoop",
-        user => "${hadoop::params::hadoop_user}",
+        user => "${hadoop::params::hadoop_path_owner}",
         require => File["hadoop-base"],
         path    => ["/bin", "/usr/bin", "/usr/sbin"],
         #onlyif => "test -d ${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}",
@@ -204,7 +204,7 @@ class hadoop {
     file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}.tar.gz":
         mode => 0664,
         ensure => present,
-        owner => "${hadoop::params::hadoop_user}",
+        owner => "${hadoop::params::hadoop_path_owner}",
         group => "${hadoop::params::hadoop_group}",
         alias => "hadoop-source-tgz",
         before => Exec["untar-hadoop"],        
@@ -217,7 +217,7 @@ class hadoop {
         creates => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}",
         alias => "untar-hadoop",
         onlyif => "test 0 -eq $(ls -al ${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version} | grep -c bin)",
-        user => "${hadoop::params::hadoop_user}",
+        user => "${hadoop::params::hadoop_path_owner}",
         before => [ File["hadoop-symlink"], File["hadoop-app-dir"] ],
         path    => ["/bin", "/usr/bin", "/usr/sbin"],
         require => File["hadoop-source-tgz"]
