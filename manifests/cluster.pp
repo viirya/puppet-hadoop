@@ -209,7 +209,7 @@ class hadoop::cluster::kerberos {
         }
  
         exec { "create WebHDFS principle":
-            command => "kadmin.local -q 'addprinc -randkey http/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
+            command => "kadmin.local -q 'addprinc -randkey HTTP/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
             user => "root",
             group => "root",
             alias => "add-princ-webhdfs",
@@ -265,7 +265,7 @@ class hadoop::cluster::kerberos {
         }
  
         exec { "create WebHDFS keytab":
-            command => "kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/http.service.keytab http/${hadoop::params::master}@${hadoop::params::kerberos_realm}'; kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/http.service.keytab host/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
+            command => "kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/http.service.keytab HTTP/${hadoop::params::master}@${hadoop::params::kerberos_realm}'; kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/http.service.keytab host/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
             user => "root",
             group => "root",
             alias => "create-keytab-http",
