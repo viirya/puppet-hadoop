@@ -111,7 +111,11 @@ class hadoop::params {
     $hadoop_tmp_path = $::hostname ? {
         default            => "${hadoop_user_path}/tmp",
     }
-
+ 
+    $mapred_log_dir = $::hostname ? {
+        default            => "${hadoop_base}/hadoop/logs",
+    }
+ 
     $hadoop_log_dir = $::hostname ? {
         default            => "${hadoop_base}/hadoop/hadoop_log",
     }

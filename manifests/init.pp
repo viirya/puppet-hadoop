@@ -138,6 +138,15 @@ class hadoop {
         require => File["${hadoop::params::hadoop_user}-home"]
     }
  
+    file {"${hadoop::params::mapred_log_dir}":
+        ensure => "directory",
+        mode => "g=rwx,o=r",
+        owner => "${hadoop::params::hadoop_path_owner}",
+        group => "${hadoop::params::hadoop_group}",
+        alias => "mapre-log-dir",
+        require => [ File["hadoop-base"], Exec["untar-hadoop"], File["hadoop-symlink"] ],
+    }
+ 
     file {"${hadoop::params::hadoop_log_dir}":
         ensure => "directory",
         mode => "g=rwx,o=r",
