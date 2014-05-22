@@ -1,3 +1,9 @@
-<% scope.lookupvar('hadoop::params::slaves').each do |var| -%>
+<% if scope.lookupvar('hadoop::params::resourcemanager') == @fqdn %>
+<% scope.lookupvar('hadoop::params::yarn_slaves').each do |var| -%>
 <%= var %>
 <% end -%>
+<% else %>
+<% scope.lookupvar('hadoop::params::dfs_slaves').each do |var| -%>
+<%= var %>
+<% end -%>
+<% end %>

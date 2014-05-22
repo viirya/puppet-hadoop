@@ -33,15 +33,23 @@ class hadoop::params {
     }
         
     $master = $::hostname ? {
-        default            => "localhost",
+        default            => "test1.openstacklocal",
+    }
+
+    $dfs_slaves = $::hostname ? {
+        default            => ["test2.openstacklocal", "test3.openstacklocal", "test4.openstacklocal"],
+    }
+
+    $yarn_slaves = $::hostname ? {
+        default            => ["test1.openstacklocal", "test3.openstacklocal", "test4.openstacklocal"],
     }
 
     $slaves = $::hostname ? {
-        default            => ["localhost"],
+        default            => unique(flatten([$dfs_slaves, $yarn_slaves])),
     }
-
+ 
     $resourcemanager = $::hostname ? {
-        default            => "localhost",
+        default            => "test2.openstacklocal",
     }
         
     $resource_tracker_port = $::hostname ? {

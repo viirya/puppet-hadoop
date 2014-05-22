@@ -323,7 +323,7 @@ class hadoop {
         alias => "hadoop-slave",
         content => template("hadoop/conf/slaves.erb"),
     }
-    
+
     file { "${hadoop::params::hadoop_user_path}/.ssh/":
         owner => "${hadoop::params::hadoop_user}",
         group => "${hadoop::params::hadoop_group}",
