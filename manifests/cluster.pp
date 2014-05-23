@@ -10,7 +10,42 @@ define datanodeprinciple {
         onlyif => "test ! -e ${hadoop::params::keytab_path}/${name}.dn.service.keytab",
     }
 }
-
+ 
+define journalnodeprinciple {
+    exec { "create JournalNode principle ${name}":
+        command => "kadmin.local -q 'addprinc -randkey hdfs/$name@${hadoop::params::kerberos_realm}'",
+        user => "root",
+        group => "root",
+        path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
+        alias => "add-princ-jn-${name}",
+        onlyif => "test ! -e ${hadoop::params::keytab_path}/${name}.hdfs.service.keytab",
+    }
+}
+ 
+define journalnode_internal_principle {
+    exec { "create JournalNode Internal principle ${name}":
+        command => "kadmin.local -q 'addprinc -randkey HTTP/$name@${hadoop::params::kerberos_realm}'",
+        user => "root",
+        group => "root",
+        alias => "add-princ-HTTP-${name}",
+        path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
+        require => File["keytab-path"],
+        onlyif => "test ! -e ${hadoop::params::keytab_path}/${name}.hdfs.service.keytab",
+    }
+}
+ 
+define webhdfs_principle {
+    exec { "create WebHDFS principle ${name}":
+        command => "kadmin.local -q 'addprinc -randkey HTTP/$name@${hadoop::params::kerberos_realm}'",
+        user => "root",
+        group => "root",
+        alias => "add-princ-HTTP-${name}",
+        path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
+        require => File["keytab-path"],
+        onlyif => "test ! -e ${hadoop::params::keytab_path}/${name}.http.service.keytab",
+    }
+}
+ 
 define nodemanagerprinciple {
     exec { "create NodeManager principle ${name}":
         command => "kadmin.local -q 'addprinc -randkey nm/$name@${hadoop::params::kerberos_realm}'",
@@ -33,6 +68,16 @@ define masterhostprinciple {
     }
 }
  
+define standbymasterhostprinciple {
+    exec { "create host principle ${name}":
+        command => "kadmin.local -q 'addprinc -randkey host/$name@${hadoop::params::kerberos_realm}'",
+        user => "root",
+        group => "root",
+        path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
+        alias => "add-princ-host-${name}",
+        onlyif => "test (! -e ${hadoop::params::keytab_path}/standby_nn.service.keytab) -a (! -e ${hadoop::params::keytab_path}/sn.service.keytab) -a (! -e ${hadoop::params::keytab_path}/rm.service.keytab) -a (! -e ${hadoop::params::keytab_path}/jhs.service.keytab)",
+    }
+} 
 define hostprinciple {
     exec { "create host principle ${name}":
         command => "kadmin.local -q 'addprinc -randkey host/$name@${hadoop::params::kerberos_realm}'",
@@ -52,7 +97,31 @@ define datanodekeytab {
         path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
         onlyif => "test ! -e ${hadoop::params::keytab_path}/${name}.dn.service.keytab",
         alias => "create-keytab-dn-${name}",
-        require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-dn-${name}"], Exec["add-princ-host-${name}"], Exec["add-princ-webhdfs"] ],
+        require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-dn-${name}"], Exec["add-princ-host-${name}"] ],
+    }
+}
+ 
+define journalnodekeytab {
+    exec { "create JournalNode keytab ${name}":
+        command => "kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/${name}.hdfs.service.keytab hdfs/$name@${hadoop::params::kerberos_realm}'; kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/${name}.hdfs.service.keytab HTTP/$name@${hadoop::params::kerberos_realm}'",
+        user => "root",
+        group => "root",
+        path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
+        onlyif => "test ! -e ${hadoop::params::keytab_path}/${name}.hdfs.service.keytab",
+        alias => "create-keytab-jn-${name}",
+        require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-jn-${name}"], Exec["add-princ-host-${name}"] ],
+    }
+}
+ 
+define webhdfskeytab {
+    exec { "create WebHDFS keytab ${name}":
+        command => "kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/${name}.http.service.keytab HTTP/$name@${hadoop::params::kerberos_realm}'; kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/${name}.http.service.keytab host/$name@${hadoop::params::kerberos_realm}'",
+        user => "root",
+        group => "root",
+        alias => "create-keytab-http-${name}",
+        path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
+        require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"], Exec["add-princ-HTTP-${name}"] ],
+        onlyif => "test ! -e ${hadoop::params::keytab_path}/${name}.http.service.keytab",
     }
 }
  
@@ -64,7 +133,7 @@ define nodemanagerkeytab {
         path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
         onlyif => "test ! -e ${hadoop::params::keytab_path}/${name}.nm.service.keytab",
         alias => "create-keytab-nm-${name}",
-        require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-nm-${name}"], Exec["add-princ-host-${name}"], Exec["add-princ-webhdfs"] ],
+        require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-nm-${name}"], Exec["add-princ-host-${name}"] ],
 
     }
 }
@@ -157,6 +226,18 @@ class hadoop::cluster::kerberos {
             require => File["keytab-path"],
             onlyif => "test ! -e ${hadoop::params::keytab_path}/nn.service.keytab",  
         }
+
+        if $hadoop::params::qjm_ha_mode == "yes" {
+            exec { "create StandBy NameNode principle":
+                command => "kadmin.local -q 'addprinc -randkey nn/${hadoop::params::standby_master}@${hadoop::params::kerberos_realm}'",
+                user => "root",
+                group => "root",
+                alias => "add-princ-standby-nn",
+                path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
+                require => File["keytab-path"],
+                onlyif => "test ! -e ${hadoop::params::keytab_path}/standby_nn.service.keytab",  
+            }
+        }
  
         exec { "create Secondary NameNode principle":
             command => "kadmin.local -q 'addprinc -randkey sn/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
@@ -183,6 +264,25 @@ class hadoop::cluster::kerberos {
             } 
         }
 
+        if $hadoop::params::qjm_ha_mode == "yes" {
+ 
+            if ! member($hadoop::params::slaves, $hadoop::params::standby_master) {
+                standbymasterhostprinciple { $hadoop::params::standby_master:
+                    require => File["keytab-path"],
+                    before  => Exec["create-keytab-standby-nn"],
+                } 
+            }
+
+            journalnodeprinciple { $hadoop::params::journalnodes: 
+                require => File["keytab-path"],
+            }
+
+            journalnode_internal_principle { $hadoop::params::journalnodes:
+                require => File["keytab-path"],
+            }
+
+        }
+ 
         if is_array(hadoop::params::slaves) or $hadoop::params::master != $hadoop::params::slaves {
             hostprinciple { $hadoop::params::slaves:
                 require => File["keytab-path"],
@@ -209,25 +309,45 @@ class hadoop::cluster::kerberos {
             require => File["keytab-path"],
             onlyif => "test ! -e ${hadoop::params::keytab_path}/jhs.service.keytab",
         }
+
+        if $hadoop::params::qjm_ha_mode == "no" or ! member($hadoop::params::journalnodes, $hadoop::params::master) {
  
-        exec { "create WebHDFS principle":
-            command => "kadmin.local -q 'addprinc -randkey HTTP/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
-            user => "root",
-            group => "root",
-            alias => "add-princ-webhdfs",
-            path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
-            require => File["keytab-path"],
-            onlyif => "test ! -e ${hadoop::params::keytab_path}/http.service.keytab",
+            exec { "create WebHDFS principle":
+                command => "kadmin.local -q 'addprinc -randkey HTTP/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
+                user => "root",
+                group => "root",
+                alias => "add-princ-HTTP-${hadoop::params::master}",
+                path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
+                require => File["keytab-path"],
+                onlyif => "test ! -e ${hadoop::params::keytab_path}/http.service.keytab",
+            }
         }
- 
+
         exec { "create NameNode keytab":
             command => "kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/nn.service.keytab nn/${hadoop::params::master}@${hadoop::params::kerberos_realm}'; kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/nn.service.keytab host/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
             user => "root",
             group => "root",
             alias => "create-keytab-nn",
             path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
-            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"], Exec["add-princ-webhdfs"] ],
+            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"] ],
             onlyif => "test ! -e ${hadoop::params::keytab_path}/nn.service.keytab",
+        }
+
+        if $hadoop::params::qjm_ha_mode == "yes" {
+ 
+            exec { "create StandBy NameNode keytab":
+                command => "kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/standby_nn.service.keytab nn/${hadoop::params::standby_master}@${hadoop::params::kerberos_realm}'; kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/standby_nn.service.keytab host/${hadoop::params::standby_master}@${hadoop::params::kerberos_realm}'",
+                user => "root",
+                group => "root",
+                alias => "create-keytab-standby-nn",
+                path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
+                require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-standby-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"] ],
+                onlyif => "test ! -e ${hadoop::params::keytab_path}/standby_nn.service.keytab",
+            }
+ 
+            journalnodekeytab { $hadoop::params::journalnodes:
+            }
+ 
         }
  
         exec { "create SecondaryNameNode keytab":
@@ -236,7 +356,7 @@ class hadoop::cluster::kerberos {
             group => "root",
             alias => "create-keytab-sn",
             path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
-            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"], Exec["add-princ-webhdfs"] ],
+            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"] ],
             onlyif => "test ! -e ${hadoop::params::keytab_path}/sn.service.keytab",
         }
 
@@ -252,7 +372,7 @@ class hadoop::cluster::kerberos {
             group => "root",
             alias => "create-keytab-rm",
             path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
-            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"], Exec["add-princ-webhdfs"] ],
+            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"] ],
             onlyif => "test ! -e ${hadoop::params::keytab_path}/rm.service.keytab",
         }
  
@@ -262,18 +382,27 @@ class hadoop::cluster::kerberos {
             group => "root",
             alias => "create-keytab-jhs",
             path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
-            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"], Exec["add-princ-webhdfs"] ],
+            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"] ],
             onlyif => "test ! -e ${hadoop::params::keytab_path}/jhs.service.keytab",
         }
  
-        exec { "create WebHDFS keytab":
-            command => "kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/http.service.keytab HTTP/${hadoop::params::master}@${hadoop::params::kerberos_realm}'; kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/http.service.keytab host/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
-            user => "root",
-            group => "root",
-            alias => "create-keytab-http",
-            path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
-            require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"], Exec["add-princ-webhdfs"] ],
-            onlyif => "test ! -e ${hadoop::params::keytab_path}/http.service.keytab",
+        if $hadoop::params::qjm_ha_mode == "yes" {
+
+            webhdfskeytab { $hadoop::params::journalnodes: 
+            }
+ 
+        } 
+
+        if $hadoop::params::qjm_ha_mode == "no" or ! member($hadoop::params::journalnodes, $hadoop::params::master) {
+            exec { "create WebHDFS keytab":
+                command => "kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/http.service.keytab HTTP/${hadoop::params::master}@${hadoop::params::kerberos_realm}'; kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/http.service.keytab host/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
+                user => "root",
+                group => "root",
+                alias => "create-keytab-http",
+                path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
+                require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"], Exec["add-princ-HTTP-${hadoop::params::master}"] ],
+                onlyif => "test ! -e ${hadoop::params::keytab_path}/http.service.keytab",
+            }
         }
         
     }        
@@ -287,7 +416,27 @@ class hadoop::cluster::master($format_namenode = 'no', $launch_dfs = 'no', $laun
     require hadoop
 
     if $hadoop::params::kerberos_mode == "yes" { 
-
+ 
+        if $hadoop::params::qjm_ha_mode == "yes" and member($hadoop::params::journalnodes, $fqdn) {
+ 
+            file { "${hadoop::params::keytab_path}/hdfs.service.keytab":
+                ensure => present,
+                owner => "root",
+                group => "${hadoop::params::hadoop_group}",
+                mode => "440",
+                source => "puppet:///modules/hadoop/keytab/${fqdn}.hdfs.service.keytab",
+            }
+ 
+            file { "${hadoop::params::keytab_path}/http.service.keytab":
+                ensure => present,
+                owner => "root",
+                group => "${hadoop::params::hadoop_group}",
+                mode => "440",
+                source => "puppet:///modules/hadoop/keytab/${fqdn}.http.service.keytab",
+            }
+ 
+        }
+ 
         if member($hadoop::params::yarn_slaves, $fqdn) {
  
             file { "${hadoop::params::keytab_path}/nm.service.keytab":
@@ -396,6 +545,41 @@ class hadoop::cluster::slave {
             require => [ File["hadoop-master"], File["hadoop-slave"] ],
         }
 
+        if $hadoop::params::qjm_ha_mode == "yes" and $fqdn == $hadoop::params::standby_master {
+ 
+            file { "${hadoop::params::keytab_path}/nn.service.keytab":
+                ensure => present,
+                owner => "root",
+                group => "${hadoop::params::hadoop_group}",
+                mode => "440",
+                source => "puppet:///modules/hadoop/keytab/standby_nn.service.keytab",
+                require => File["keytab-path"],
+            }
+
+        }
+ 
+        if $hadoop::params::qjm_ha_mode == "yes" and member($hadoop::params::journalnodes, $fqdn) {
+ 
+            file { "${hadoop::params::keytab_path}/hdfs.service.keytab":
+                ensure => present,
+                owner => "root",
+                group => "${hadoop::params::hadoop_group}",
+                mode => "440",
+                source => "puppet:///modules/hadoop/keytab/${fqdn}.hdfs.service.keytab",
+                require => File["keytab-path"],
+            }
+ 
+            file { "${hadoop::params::keytab_path}/http.service.keytab":
+                ensure => present,
+                owner => "root",
+                group => "${hadoop::params::hadoop_group}",
+                mode => "440",
+                source => "puppet:///modules/hadoop/keytab/${fqdn}.http.service.keytab",
+                require => File["keytab-path"],
+            }
+   
+        }
+ 
         if member($hadoop::params::dfs_slaves, $fqdn) { 
             file { "${hadoop::params::keytab_path}/dn.service.keytab":
                 ensure => present,

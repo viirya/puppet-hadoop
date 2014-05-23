@@ -37,7 +37,7 @@ class hadoop::params {
     }
 
     $dfs_slaves = $::hostname ? {
-        default            => ["test2.openstacklocal", "test3.openstacklocal", "test4.openstacklocal"],
+        default            => ["test3.openstacklocal", "test4.openstacklocal"],
     }
 
     $yarn_slaves = $::hostname ? {
@@ -158,7 +158,28 @@ class hadoop::params {
         $hadoop_path_owner = "${hadoop_user}"
     }
 
+    $qjm_ha_mode = $::hostname ? {
+        default            => "yes",
+    }
 
+    if $qjm_ha_mode == "yes" {
+
+        $dfs_nameservices = "mycluster"
+        $standby_master = "test2.openstacklocal"
+        $journalnodes = unique(flatten(["test2.openstacklocal",  $yarn_slaves]))
+        $journal_data_dir = "/tmp/journaldata"
+        $journal_master = $dfs_slaves[0]
+
+    } elsif $qjm_ha_mode == "no" {
+
+        $dfs_nameservices = undef
+        $standby_master = undef
+        $journalnodes = under
+        $journal_data_dir = undef
+        $journal_master = undef
+
+    }
+ 
     #$yarn_nodemanager_localdirs = $::hostname ? {
     #    default            => "${yarn_user_path}/nm-local-dir}",
     #}

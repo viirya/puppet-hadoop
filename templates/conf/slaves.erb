@@ -2,6 +2,10 @@
 <% scope.lookupvar('hadoop::params::yarn_slaves').each do |var| -%>
 <%= var %>
 <% end -%>
+<% elsif scope.lookupvar('hadoop::params::journal_master') == @fqdn %>
+<% scope.lookupvar('hadoop::params::journalnodes').each do |var| -%>
+<%= var %>
+<% end -%>
 <% else %>
 <% scope.lookupvar('hadoop::params::dfs_slaves').each do |var| -%>
 <%= var %>

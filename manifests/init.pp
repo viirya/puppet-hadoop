@@ -688,4 +688,17 @@ class hadoop {
         #}
  
     }
+
+    if $hadoop::params::qjm_ha_mode == "yes" {
+
+        file { "${hadoop::params::journal_data_dir}":
+            ensure => "directory",
+            owner => "${hadoop::params::hdfs_user}",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "750",
+            alias => "journal-datapath",
+        }
+
+    }
+
 }
