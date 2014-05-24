@@ -170,6 +170,15 @@ class hadoop::params {
         $journal_data_dir = "/tmp/journaldata"
         $journal_master = $dfs_slaves[0]
 
+        $zookeeper_quorum = $::hostname ? {
+            default         => unique(flatten(["test2.openstacklocal",  $dfs_slaves])),
+        }
+
+        $zk_auth_text = "digest:hdfs-zkfcs:mypassword"
+        # obtain following acl text by running:
+        # java -cp $ZK_HOME/lib/*:$ZK_HOME/zookeeper-3.4.2.jar org.apache.zookeeper.server.auth.DigestAuthenticationProvider hdfs-zkfcs:mypassword
+        $zk_acl_text = "digest:hdfs-zkfcs:P/OQvnYyU/nF/mGYvB/xurX8dYs=:rwcda"
+
     } elsif $qjm_ha_mode == "no" {
 
         $dfs_nameservices = undef
@@ -177,6 +186,10 @@ class hadoop::params {
         $journalnodes = under
         $journal_data_dir = undef
         $journal_master = undef
+
+        $zookeeper_quorum = undef
+        $zk_auth_text = undef
+        $zk_acl_text = undef
 
     }
  

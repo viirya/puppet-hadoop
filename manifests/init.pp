@@ -698,7 +698,26 @@ class hadoop {
             mode => "750",
             alias => "journal-datapath",
         }
-
+ 
+ 
+        file { "${hadoop::params::hdfs_user_path}/zk-auth.txt":
+            ensure => present,
+            owner => "${hadoop::params::hdfs_user}",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "644",
+            content => template("hadoop/conf/zk-auth.txt.erb"),
+            require => [ User["${hadoop::params::hdfs_user}"], File["${hadoop::params::hdfs_user_path}"] ],
+        }
+        
+        file { "${hadoop::params::hdfs_user_path}/zk-acl.txt":
+            ensure => present,
+            owner => "${hadoop::params::hdfs_user}",
+            group => "${hadoop::params::hadoop_group}",
+            mode => "644",
+            content => template("hadoop/conf/zk-acl.txt.erb"),
+            require => [ User["${hadoop::params::hdfs_user}"], File["${hadoop::params::hdfs_user_path}"] ],
+        }
+ 
     }
 
 }
