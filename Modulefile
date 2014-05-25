@@ -1,5 +1,5 @@
 name    'viirya-hadoop'
-version '0.0.14'
+version '0.0.15'
 author 'Liang-Chi Hsieh'
 dependency 'viirya/java', '0.0.5'
 dependency 'puppetlabs/stdlib', '>= 3.2.0'
