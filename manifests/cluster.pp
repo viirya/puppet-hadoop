@@ -109,7 +109,7 @@ define journalnodekeytab {
         path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
         onlyif => "test ! -e ${hadoop::params::keytab_path}/${name}.hdfs.service.keytab",
         alias => "create-keytab-jn-${name}",
-        require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-jn-${name}"], Exec["add-princ-host-${name}"] ],
+        require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-jn-${name}"], Exec["add-princ-host-${name}"], Exec["add-princ-HTTP-${name}"] ],
     }
 }
  
@@ -120,7 +120,7 @@ define webhdfskeytab {
         group => "root",
         alias => "create-keytab-http-${name}",
         path    => ["/usr/sbin", "/usr/kerberos/sbin", "/usr/bin"],
-        require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${hadoop::params::master}"], Exec["add-princ-HTTP-${name}"] ],
+        require => [ Exec["add-princ-jhs"], Exec["add-princ-rm"], Exec["add-princ-nn"], Exec["add-princ-sn"], Exec["add-princ-host-${name}"], Exec["add-princ-HTTP-${name}"] ],
         onlyif => "test ! -e ${hadoop::params::keytab_path}/${name}.http.service.keytab",
     }
 }

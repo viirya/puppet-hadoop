@@ -9,7 +9,7 @@ class hadoop::params {
     }
 
     $download_url = $::hostname ? {
-        default            => "http://apache.stu.edu.tw/hadoop/common/hadoop-${version}",
+        default            => "http://ftp.tc.edu.tw/pub/Apache/hadoop/common/hadoop-${version}",
     }           
  
     $hadoop_user = $::hostname ? {
@@ -33,15 +33,15 @@ class hadoop::params {
     }
         
     $master = $::hostname ? {
-        default            => "test1.openstacklocal",
+        default            => "vm1.openstacklocal",
     }
 
     $dfs_slaves = $::hostname ? {
-        default            => ["test3.openstacklocal", "test4.openstacklocal"],
+        default            => ["vm3.openstacklocal", "vm4.openstacklocal"],
     }
 
     $yarn_slaves = $::hostname ? {
-        default            => ["test1.openstacklocal", "test3.openstacklocal", "test4.openstacklocal"],
+        default            => ["vm1.openstacklocal", "vm3.openstacklocal", "vm4.openstacklocal"],
     }
 
     $slaves = $::hostname ? {
@@ -49,7 +49,7 @@ class hadoop::params {
     }
  
     $resourcemanager = $::hostname ? {
-        default            => "test2.openstacklocal",
+        default            => "vm2.openstacklocal",
     }
         
     $resource_tracker_port = $::hostname ? {
@@ -117,7 +117,7 @@ class hadoop::params {
     #}
 
     $hadoop_tmp_path = $::hostname ? {
-        default            => "${hadoop_user_path}/tmp",
+        default            => "/data/hadoop",
     }
  
     $mapred_log_dir = $::hostname ? {
@@ -165,13 +165,13 @@ class hadoop::params {
     if $qjm_ha_mode == "yes" {
 
         $dfs_nameservices = "mycluster"
-        $standby_master = "test2.openstacklocal"
-        $journalnodes = unique(flatten(["test2.openstacklocal",  $yarn_slaves]))
+        $standby_master = "vm2.openstacklocal"
+        $journalnodes = unique(flatten(["vm2.openstacklocal",  $yarn_slaves]))
         $journal_data_dir = "/tmp/journaldata"
         $journal_master = $dfs_slaves[0]
 
         $zookeeper_quorum = $::hostname ? {
-            default         => unique(flatten(["test2.openstacklocal",  $dfs_slaves])),
+            default         => unique(flatten(["vm2.openstacklocal",  $yarn_slaves])),
         }
 
         $zk_auth_text = "digest:hdfs-zkfcs:mypassword"

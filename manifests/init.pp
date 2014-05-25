@@ -545,7 +545,7 @@ class hadoop {
         }
 
         exec { "download apache commons ${hadoop::params::common_version}.tar.gz":
-            command => "wget http://apache.stu.edu.tw//commons/daemon/source/commons-daemon-${hadoop::params::common_version}-src.tar.gz",
+            command => "wget http://ftp.tc.edu.tw/pub/Apache//commons/daemon/source/commons-daemon-${hadoop::params::common_version}-src.tar.gz",
             cwd => "${hadoop::params::common_base}",
             alias => "download-commons",
             user => "${hadoop::params::hadoop_user}",
