@@ -301,7 +301,7 @@ class hadoop::cluster::kerberos {
         }
  
         exec { "create JobHistoryServer principle":
-            command => "kadmin.local -q 'addprinc -randkey jhs/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
+            command => "kadmin.local -q 'addprinc -randkey jhs/${hadoop::params::jobhistory_addr}@${hadoop::params::kerberos_realm}'",
             user => "root",
             group => "root",
             alias => "add-princ-jhs",
@@ -377,7 +377,7 @@ class hadoop::cluster::kerberos {
         }
  
         exec { "create JobHistory keytab":
-            command => "kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/jhs.service.keytab jhs/${hadoop::params::master}@${hadoop::params::kerberos_realm}'; kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/jhs.service.keytab host/${hadoop::params::master}@${hadoop::params::kerberos_realm}'",
+            command => "kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/jhs.service.keytab jhs/${hadoop::params::jobhistory_addr}@${hadoop::params::kerberos_realm}'; kadmin.local -q 'ktadd -k ${hadoop::params::keytab_path}/jhs.service.keytab host/${hadoop::params::jobhistory_addr}@${hadoop::params::kerberos_realm}'",
             user => "root",
             group => "root",
             alias => "create-keytab-jhs",

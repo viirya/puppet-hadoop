@@ -56,6 +56,8 @@ class hadoop::params {
         default            => "8031",
     }
 
+    $jobhistory_addr = $resourcemanager
+
     $scheduler_port = $::hostname ? {
         default            => "8030",
     }
@@ -193,12 +195,12 @@ class hadoop::params {
 
     }
  
-    #$yarn_nodemanager_localdirs = $::hostname ? {
-    #    default            => "${yarn_user_path}/nm-local-dir}",
-    #}
+    $yarn_nodemanager_localdirs = $::hostname ? {
+        default            => "${yarn_user_path}/nm-local-dir",
+    }
 
-    #$yarn_nodemanager_logdirs = $::hostname ? {
-    #    default            => "${yarn_user_path}/userlogs}",
-    #}
+    $yarn_nodemanager_logdirs = $::hostname ? {
+        default            => "${yarn_user_path}/userlogs",
+    }
 
 }
