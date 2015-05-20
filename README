@@ -7,7 +7,7 @@ Usage:
 
 Install this module on your puppet master node by:
 
-    sudo puppet install viirya-hadoop.
+    sudo puppet module install viirya-hadoop.
 
 In site.pp, define:
 
